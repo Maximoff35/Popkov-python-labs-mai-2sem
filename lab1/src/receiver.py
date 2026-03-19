@@ -10,4 +10,9 @@ def collect_tasks(source: TaskSource) -> List[Task]:
     """
     if not isinstance(source, TaskSource):
         raise TypeError('Объект не реализует протокол TaskSource')
-    return list(source.get_tasks())
+
+    tasks = source.get_tasks()
+    try:
+        return list(tasks)
+    except TypeError:
+        raise TypeError("get_tasks должен возвращать Iterable")
