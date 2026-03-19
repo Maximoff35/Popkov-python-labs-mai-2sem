@@ -1,0 +1,13 @@
+[
+    {
+        "id": 1,
+        "payload": "Обработать наблюдение"
+    },
+    {
+        "id": 2,
+        "payload": {
+            "type": "report",
+            "priority": "high"
+        }
+    }
+]
