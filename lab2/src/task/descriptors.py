@@ -42,6 +42,9 @@ class TaskIdDescriptor(BaseDescriptor):
         Устанавливает значение id.
         """
 
+        if self.private_name in instance.__dict__:
+            raise InvalidTaskIdError('ID задачи нельзя изменять.')
+
         if not isinstance(value, int):
             raise InvalidTaskIdError('ID задачи должен быть целым числом.')
         if value <= 0:
