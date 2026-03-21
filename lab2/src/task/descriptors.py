@@ -120,6 +120,9 @@ class TaskCreatedAtDescriptor(BaseDescriptor):
         Устанавливает значение времени создания.
         """
 
+        if self.private_name in instance.__dict__:
+            raise InvalidTaskCreatedAtError('Время создания задачи нельзя изменять.')
+
         if not isinstance(value, datetime):
             raise InvalidTaskCreatedAtError('Время создания задачи должно быть типа datetime.')
         instance.__dict__[self.private_name] = value
