@@ -1,29 +1,32 @@
 from src.sources.generator_source import GeneratorSource
-from src.sources.file_source import FileSource
-from src.sources.api_source import ApiSource
-from src.sources.clients.jsonplaceholder_client import JsonPlaceholderClient
 from src.receiver import collect_tasks
+from src.task_queue import TaskQueue
 
 
 def main():
-    print("=== Генератор ===")
-    gen_source = GeneratorSource(3)
+    gen_source = GeneratorSource(10)
     gen_tasks = collect_tasks(gen_source)
-    for task in gen_tasks:
-        print(task)
+    queue = TaskQueue(gen_tasks)
 
-    print("\n=== Файл ===")
-    file_source = FileSource("data/tasks.json")
-    file_tasks = collect_tasks(file_source)
-    for task in file_tasks:
-        print(task)
+    print('=== Все задачи ===')
+    for task in queue:
+        print(task.summary)
 
-    print("\n=== API JSONPlaceholder ===")
-    client = JsonPlaceholderClient("https://jsonplaceholder.typicode.com/todos")
-    api_source = ApiSource(client)
-    api_tasks = collect_tasks(api_source)
-    for task in api_tasks[:5]:
-        print(task)
+    print('\n=== Задачи со статусом in_progress ===')
+    for task in queue.filter_by_status('in_progress'):
+        print(task.summary)
+
+    print('\n=== Задачи с приоритетом high ===')
+    for task in queue.filter_by_priority('high'):
+        print(task.summary)
+
+    print('\n=== Готовые к выполнению задачи ===')
+    for task in queue.filter_ready_tasks():
+        print(task.summary)
+
+    print('\n=== Выполненные задачи ===')
+    for task in queue.filter_completed_tasks():
+        print(task.summary)
 
 
 if __name__ == "__main__":
