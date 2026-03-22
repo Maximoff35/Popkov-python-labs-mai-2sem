@@ -1,4 +1,4 @@
-from src.contracts import TaskSource, ApiClient
+from src.contracts import TaskSource, ApiClient, TaskHandler
 
 class BadSource:
     pass
@@ -30,3 +30,18 @@ def test_good_api_client():
 def test_bad_api_client():
     client = BadApiClient()
     assert not isinstance(client, ApiClient)
+
+class GoodTaskHandler:
+    async def handle(self, task):
+        return 'processed'
+
+class BadTaskHandler:
+    pass
+
+def test_good_task_handler():
+    handler = GoodTaskHandler
+    assert isinstance(handler, TaskHandler)
+
+def test_bad_task_handler():
+    handler = BadTaskHandler
+    assert not isinstance(handler, TaskHandler)

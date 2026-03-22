@@ -62,6 +62,84 @@ def test_file_source(tmp_path):
     assert cnt == 3
 
 
+def test_file_source_init_invalid_path_type():
+    with pytest.raises(TypeError):
+        FileSource(123)
+
+
+def test_file_source_invalid_json(tmp_path):
+    file_path = tmp_path / "bad.json"
+    file_path.write_text("{ invalid json", encoding="utf-8")
+
+    source = FileSource(str(file_path))
+
+    with pytest.raises(ValueError, match='Файл не является корректным JSON.'):
+        list(source.get_tasks())
+
+
+def test_file_source_json_not_list(tmp_path):
+    data = {"id": 1, "description": "Одна задача"}
+
+    file_path = tmp_path / "tasks.json"
+    file_path.write_text(json.dumps(data), encoding="utf-8")
+
+    source = FileSource(str(file_path))
+
+    with pytest.raises(TypeError, match='Файл не является JSON-списком.'):
+        list(source.get_tasks())
+
+
+def test_file_source_list_item_not_dict(tmp_path):
+    data = ["not a dict"]
+
+    file_path = tmp_path / "tasks.json"
+    file_path.write_text(json.dumps(data), encoding="utf-8")
+
+    source = FileSource(str(file_path))
+
+    with pytest.raises(TypeError, match='Элемент не является JSON-словарем.'):
+        list(source.get_tasks())
+
+
+def test_file_source_missing_required_fields(tmp_path):
+    data = [
+        {
+            "id": 1,
+            "description": "Обработать наблюдение",
+            "priority": "high",
+            "status": "new"
+        }
+    ]
+
+    file_path = tmp_path / "tasks.json"
+    file_path.write_text(json.dumps(data), encoding="utf-8")
+
+    source = FileSource(str(file_path))
+
+    with pytest.raises(ValueError, match='Не хватает необходимых полей в словаре.'):
+        list(source.get_tasks())
+
+
+def test_file_source_invalid_created_at_format(tmp_path):
+    data = [
+        {
+            "id": 1,
+            "description": "Обработать наблюдение",
+            "priority": "high",
+            "status": "new",
+            "created_at": "not-a-date"
+        }
+    ]
+
+    file_path = tmp_path / "tasks.json"
+    file_path.write_text(json.dumps(data), encoding="utf-8")
+
+    source = FileSource(str(file_path))
+
+    with pytest.raises(ValueError, match='Некорректный формат даты created_at.'):
+        list(source.get_tasks())
+
+
 class FakeApiClient:
     def get_raw_tasks(self):
         return [
