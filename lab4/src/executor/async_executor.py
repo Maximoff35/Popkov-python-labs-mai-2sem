@@ -9,6 +9,7 @@ from src.executor.executor_exceptions import (
 )
 from src.executor.logger import get_logger
 from src.executor.constants import TASK_PROCESSED, TASK_SKIPPED
+from src.executor.resources import TaskExecutionContext
 
 
 logger = get_logger(__name__)
@@ -47,21 +48,22 @@ class TaskExecutor:
         """
         Асинхронно запускает обработку всех задач из очереди.
         """
-        for t in self.queue:
-            try:
-                if not isinstance(t, Task):
-                    raise InvalidTaskError('Невалидная задача.')
-                handler = self._get_handler(t)
-                logger.info(f'Начата обработка задачи id={t.id}, priority={t.priority}.')
-                result = await handler.handle(t)
-                if result == TASK_PROCESSED:
-                    logger.info(f'Завершена обработка задачи id={t.id}, status={t.status}.')
-                elif result == TASK_SKIPPED:
-                    logger.warning(f'Задача id={t.id} пропущена, status={t.status}.')
-                else:
-                    logger.warning(f'Задача id={t.id} вернула неизвестный результат: {result}.')
-            except TaskExecutionError as error:
-                logger.error(f'Ошибка обработки задачи id={t.id}: {error}')
-            except Exception:
-                logger.exception(f'Непредвиденная ошибка при обработке задачи id={t.id}')
+        async with TaskExecutionContext():
+            for t in self.queue:
+                try:
+                    if not isinstance(t, Task):
+                        raise InvalidTaskError('Невалидная задача.')
+                    handler = self._get_handler(t)
+                    logger.info(f'Начата обработка задачи id={t.id}, priority={t.priority}.')
+                    result = await handler.handle(t)
+                    if result == TASK_PROCESSED:
+                        logger.info(f'Завершена обработка задачи id={t.id}, status={t.status}.')
+                    elif result == TASK_SKIPPED:
+                        logger.warning(f'Задача id={t.id} пропущена, status={t.status}.')
+                    else:
+                        logger.warning(f'Задача id={t.id} вернула неизвестный результат: {result}.')
+                except TaskExecutionError as error:
+                    logger.error(f'Ошибка обработки задачи id={getattr(t, 'id', 'unknown')}: {error}')
+                except Exception:
+                    logger.exception(f"Непредвиденная ошибка при обработке задачи id={getattr(t, 'id', 'unknown')}")
 
