@@ -35,7 +35,7 @@ class TaskHandler(Protocol):
     Любой обработчик должен уметь асинхронно обработать одну задачу.
     """
 
-    async def handle(self, task: Task) -> None:
+    async def handle(self, task: Task) -> str:
         """
         Обрабатывает одну задачу.
         :param task: Задача - объект Task
