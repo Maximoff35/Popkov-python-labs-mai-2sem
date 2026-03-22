@@ -26,3 +26,18 @@ class ApiClient(Protocol):
         Метод, который возвращает необходимые для задач данные из API
         """
         ...
+
+
+@runtime_checkable
+class TaskHandler(Protocol):
+    """
+    Контракт для обработчика задач.
+    Любой обработчик должен уметь асинхронно обработать одну задачу.
+    """
+
+    async def handle(self, task: Task) -> None:
+        """
+        Обрабатывает одну задачу.
+        :param task: Задача - объект Task
+        """
+        ...
