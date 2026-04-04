@@ -63,7 +63,7 @@ class TaskExecutor:
                     else:
                         logger.warning(f'Задача id={t.id} вернула неизвестный результат: {result}.')
                 except TaskExecutionError as error:
-                    logger.error(f'Ошибка обработки задачи id={getattr(t, 'id', 'unknown')}: {error}')
+                    logger.error(f"Ошибка обработки задачи id={getattr(t, 'id', 'unknown')}: {error}")
                 except Exception:
                     logger.exception(f"Непредвиденная ошибка при обработке задачи id={getattr(t, 'id', 'unknown')}")
 
